@@ -1,29 +1,18 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+
+
 var PORT = process.env.PORT || 3000;
 var middleware = require('./Model/middleware.js');
 
-var todos = [{
+var todos = []
 
-	id:1,
-	description: 'meet mom for lunch',
-	completed: false
-
-	}, {
-
-		id: 2,
-		description: 'Go to market',
-		completed: false
-	},
-	{
-		id: 3,
-		description: 'Feed the cat',
-		completed: true
-	}
-]
+var todoNextId = 1;
 
 app.use(middleware.requireAuthentication);
 app.use(middleware.logger);
+app.use(bodyParser.json());
 
 app.get('/', function(request, response){
 
@@ -52,13 +41,10 @@ app.get('/todos/:id', function(request, response){
 
 	if(matchedTodo)
 	{
-
-		//response.json(matchedTodo);
 		response.json(matchedTodo);
 	}
 	else
 	{
-		//response.status(404);
 		response.sendStatus(404);
 	}
 	
@@ -78,6 +64,21 @@ app.get('/todd', function(request, response){
 app.get('/about', middleware.requireAuthentication, function(request, response){
 
 	response.send('About us!');
+});
+
+
+app.post('/todos', function(request, response){
+
+	var body = request.body;
+
+	body.id = todoNextId++;
+
+	todos.push(body);
+
+	console.log(todos);
+
+	response.json(body);
+
 });
 
 app.use(express.static(__dirname + '/public'));
