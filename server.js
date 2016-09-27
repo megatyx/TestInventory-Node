@@ -5,6 +5,7 @@ var middleware = require('./Model/middleware.js');
 
 var todos = [{
 
+	id:1,
 	description: 'meet mom for lunch',
 	completed: false
 
@@ -33,13 +34,35 @@ app.get('/todos', function(request, response){
 
 	response.json(todos);
 
-})
+});
 
 app.get('/todos/:id', function(request, response){
 
-	response.send('asking for todo with id of ' + request.params.id)
+	var todoID = parseInt(request.params.id, 10);
+	console.log(todoID);
+	var matchedTodo;
+
+	todos.forEach(function(todo) {
+		if (todoID === todo.id)
+		{
+			matchedTodo = todo
+		}
+
+	});
+
+	if(matchedTodo)
+	{
+
+		//response.json(matchedTodo);
+		response.json(matchedTodo);
+	}
+	else
+	{
+		//response.status(404);
+		response.sendStatus(404);
+	}
 	
-})
+});
 
 app.get('/todd', function(request, response){
 
@@ -50,7 +73,7 @@ app.get('/todd', function(request, response){
 	}]
 
 	response.json(todd)
-})
+});
 
 app.get('/about', middleware.requireAuthentication, function(request, response){
 
