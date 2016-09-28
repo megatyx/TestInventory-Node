@@ -29,7 +29,6 @@ app.get('/todos', function(request, response){
 app.get('/todos/:id', function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
-	console.log(todoID);
 	var matchedTodo = _.findWhere(todos, {id: todoID});
 
 	if(matchedTodo)
@@ -77,6 +76,35 @@ app.post('/todos', function(request, response){
 	todos.push(body);
 
 	response.json(body);
+
+});
+
+// app.update('/todos', function(request, response){
+
+// 	var body = _.pick(request.body, 'description', 'completed');
+
+// 	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+
+// 		return response.sendStatus(400)
+// 	}
+
+// });
+
+app.delete('/todos/:id', function(request, response){
+
+	var todoID = parseInt(request.params.id, 10);
+
+	var matchedTodo = _.findWhere(todos, {id: todoID});
+
+	if(!matchedTodo)
+	{
+		response.sendStatus(404);
+	}
+	else
+	{
+		todos = _.without(todos, matchedTodo);
+		response.json(matchedTodo);
+	}
 
 });
 
