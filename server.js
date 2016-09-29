@@ -29,7 +29,7 @@ app.use(middleware.logger);
 app.use(bodyParser.json());
 
 
-app.get('/econ/ask/:id', function(request, response){
+app.get('/ask/:id', function(request, response){
 
 	var answerID = request.params.id
 	var matchedObject = _.findWhere(autoComplete.faqs, {id: answerID});
