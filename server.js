@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.get('/econ/:keyword', function(request, response){
 
 	var keyword = request.params.keyword
-	var matchedObject = _.findWhere(autoComplete, {question: keyword});
+	var matchedObject = _.findWhere(autoComplete[0].faqs, {question: keyword});
 
 	if(matchedObject)
 	{
@@ -41,7 +41,7 @@ app.get('/econ/:keyword', function(request, response){
 	}
 	else
 	{
-		response.sendStatus(404);
+		response.status(404).json({error: keyword + " not found"});
 	}
 	
 });
