@@ -11,8 +11,7 @@ var todos = []
 
 var todoNextId = 1;
 
-var autoComplete = [
-	{
+var autoComplete = {
 		faqs: [
 			{
 				name: "hello",
@@ -23,8 +22,6 @@ var autoComplete = [
 
 		]
 	}
-	
-]
 
 app.use(middleware.requireAuthentication);
 app.use(middleware.logger);
@@ -33,11 +30,11 @@ app.use(bodyParser.json());
 app.get('/econ/:keyword', function(request, response){
 
 	var keyword = request.params.keyword
-	var matchedObject = _.findWhere(autoComplete[0].faqs, {question: keyword});
+	var matchedObject = _.findWhere(autoComplete.faqs, {question: keyword});
 
 	if(matchedObject)
 	{
-		response.json([{faqs: [matchedObject]}]);
+		response.json({faqs: [matchedObject]});
 	}
 	else
 	{
