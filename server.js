@@ -37,7 +37,7 @@ app.get('/econ/:keyword', function(request, response){
 
 	if(matchedObject)
 	{
-		response.json(matchedObject);
+		response.json(faqs: [matchedObject]);
 	}
 	else
 	{
