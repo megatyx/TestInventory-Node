@@ -11,9 +11,34 @@ var todos = []
 
 var todoNextId = 1;
 
+var autoComplete = [
+	{
+		name: "hello",
+		id: 0,
+		description: "some description",
+		question: "Home Loans"
+	}
+]
+
 app.use(middleware.requireAuthentication);
 app.use(middleware.logger);
 app.use(bodyParser.json());
+
+app.get('/econ/:keyword', function(request, response){
+
+	var keyword = request.params.keyword
+	var matchedObject = _.findWhere(autoComplete, {question: keyword});
+
+	if(matchedObject)
+	{
+		response.json(matchedObject);
+	}
+	else
+	{
+		response.sendStatus(404);
+	}
+	
+});
 
 app.get('/', function(request, response){
 
@@ -79,16 +104,41 @@ app.post('/todos', function(request, response){
 
 });
 
-// app.update('/todos', function(request, response){
 
-// 	var body = _.pick(request.body, 'description', 'completed');
+app.put('/todos/:id', function(request, response){
 
-// 	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+	var todoID = parseInt(request.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: todoID});
+	var body = _.pick(request.body, 'description', 'completed');
+	var validAttributes = {};
 
-// 		return response.sendStatus(400)
-// 	}
+	if(!matchedTodo)
+	{
+		return response.status(404).send()
+	}
 
-// });
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)) 
+	{
+		validAttributes.completed = body.completed;
+
+	}else if (body.hasOwnProperty('completed')){
+		return response.status(400).send()
+	}
+
+	if(body.hasOwnProperty('description') && _.isString(body.description))
+	{
+
+		validAttributes.description = body.description
+	}else if(body.hasOwnProperty('description'))
+	{
+		return response.status(400).send()
+	}
+
+	_.extend(matchedTodo, validAttributes);
+
+	response.json(matchedTodo);
+
+});
 
 app.delete('/todos/:id', function(request, response){
 
@@ -98,7 +148,7 @@ app.delete('/todos/:id', function(request, response){
 
 	if(!matchedTodo)
 	{
-		response.sendStatus(404);
+		response.status(404).json({"error": "Not Found"});
 	}
 	else
 	{
