@@ -17,7 +17,8 @@ var autoComplete = {
 				name: "hello",
 				id: 0,
 				description: "some description",
-				question: "Home Loans"
+				question: "Home Loans",
+				answer: "This is my answer"
 			}
 
 		]
@@ -26,6 +27,23 @@ var autoComplete = {
 app.use(middleware.requireAuthentication);
 app.use(middleware.logger);
 app.use(bodyParser.json());
+
+
+app.get('/econ/ask/:id', function(request, response){
+
+	var keyword = request.params.keyword
+	var matchedObject = _.findWhere(autoComplete.faqs, {question: keyword});
+
+	if(matchedObject)
+	{
+		response.json({faqs: [matchedObject]});
+	}
+	else
+	{
+		response.status(404).json({error: keyword + " not found"});
+	}
+	
+});
 
 app.get('/econ/:keyword', function(request, response){
 
