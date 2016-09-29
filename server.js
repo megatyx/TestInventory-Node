@@ -31,8 +31,8 @@ app.use(bodyParser.json());
 
 app.get('/econ/ask/:id', function(request, response){
 
-	var keyword = request.params.keyword
-	var matchedObject = _.findWhere(autoComplete.faqs, {question: keyword});
+	var answerID = request.params.id
+	var matchedObject = _.findWhere(autoComplete.faqs, {id: answerID});
 
 	if(matchedObject)
 	{
@@ -40,7 +40,7 @@ app.get('/econ/ask/:id', function(request, response){
 	}
 	else
 	{
-		response.status(404).json({error: keyword + " not found"});
+		response.status(404).json({error: answerID + " not found"});
 	}
 	
 });
