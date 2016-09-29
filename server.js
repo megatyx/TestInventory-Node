@@ -12,16 +12,17 @@ var todos = []
 var todoNextId = 1;
 
 var autoComplete = [
+	{
+		faqs: [
+			{
+				name: "hello",
+				id: 0,
+				description: "some description",
+				question: "Home Loans"
+			}
 
-	faqs[
-		{
-			name: "hello",
-			id: 0,
-			description: "some description",
-			question: "Home Loans"
-		}
-
-	]
+		]
+	}
 	
 ]
 
