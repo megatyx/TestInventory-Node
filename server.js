@@ -99,16 +99,20 @@ app.get('/todos', function(request, response){
 app.get('/todos/:id', function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {id: todoID});
 
-	if(matchedTodo)
-	{
-		response.json(matchedTodo);
-	}
-	else
-	{
-		response.sendStatus(404);
-	}
+	var matchedTodo = db.todo.findById(todoID).then(function(todo){
+
+		if(!!todo)
+		{
+			response.json(todo.toJSON());
+		}
+		else{
+			response.status(404).send();
+		}
+
+	}, function(e){
+		response.status(500).send();
+	});
 	
 });
 
