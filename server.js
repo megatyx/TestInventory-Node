@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var _ = require('underscore');
+var db = require('./db.js');
 
 
 var PORT = process.env.PORT || 3000;
@@ -68,7 +69,30 @@ app.get('/', function(request, response){
 
 app.get('/todos', function(request, response){
 
-	response.json(todos);
+	var queryParams = request.query;
+	var filteredTodos = todos;
+
+	if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true')
+	{
+
+		filteredTodos = _.where(filteredTodos,{ completed: true});
+
+	} else if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
+
+		filteredTodos = _.where(filteredTodos,{ completed: false});
+	}
+
+	if(queryParams.hasOwnProperty('des') && queryParams.des.length > 0)
+	{
+
+		filteredTodos = _.filter(filteredTodos, function(todo){
+
+			return todo.description.toLowerCase().indexOf(queryParams.des.toLowerCase()) > -1;
+
+		});
+	}
+
+	response.json(filteredTodos);
 
 });
 
@@ -109,19 +133,28 @@ app.post('/todos', function(request, response){
 
 	var body = _.pick(request.body, 'description', 'completed');
 
-	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+	db.todo.create(body).then(function(todo){
 
-		return response.sendStatus(400)
-	}
+		response.json(todo.toJSON());
 
-	body.description = body.description.trim()
+	}, function(e){
+
+		response.status(400).json(e);
+	});
+
+	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+
+	// 	return response.sendStatus(400)
+	// }
+
+	// body.description = body.description.trim()
 
 
-	body.id = todoNextId++;
+	// body.id = todoNextId++;
 
-	todos.push(body);
+	// todos.push(body);
 
-	response.json(body);
+	// response.json(body);
 
 });
 
@@ -181,7 +214,12 @@ app.delete('/todos/:id', function(request, response){
 
 app.use(express.static(__dirname + '/public'));
 
-app.listen(PORT, function(){
+db.sequelize.sync().then(function(){
 
-	console.log('Express server started on port: ' + PORT + '!');
+	app.listen(PORT, function(){
+
+		console.log('Express server started on port: ' + PORT + '!');
+	});
+
 });
+
