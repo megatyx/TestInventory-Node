@@ -69,30 +69,33 @@ app.get('/', function(request, response){
 
 app.get('/todos', function(request, response){
 
-	var queryParams = request.query;
-	var filteredTodos = todos;
+	var query = request.query;
 
-	if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true')
+	var where = {};
+
+	if(query.hasOwnProperty('completed') && query.completed === 'true'){
+
+		where.completed = true;
+	}
+	else if (query.hasOwnProperty('completed') && query.completed === 'false')
 	{
 
-		filteredTodos = _.where(filteredTodos,{ completed: true});
-
-	} else if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
-
-		filteredTodos = _.where(filteredTodos,{ completed: false});
+		where.completed = false;
 	}
 
-	if(queryParams.hasOwnProperty('des') && queryParams.des.length > 0)
+	if(query.hasOwnProperty('des') && query.des.length > 0)
 	{
 
-		filteredTodos = _.filter(filteredTodos, function(todo){
-
-			return todo.description.toLowerCase().indexOf(queryParams.des.toLowerCase()) > -1;
-
-		});
+		where.description = {
+			$like: '%'+ query.des + '%'
+		}
 	}
 
-	response.json(filteredTodos);
+	db.todo.findAll({where: where}).then(function(todos){
+		response.json(todos);
+	}, function(e){
+		response.status(500).send();
+	});
 
 });
 
@@ -145,20 +148,6 @@ app.post('/todos', function(request, response){
 
 		response.status(400).json(e);
 	});
-
-	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-
-	// 	return response.sendStatus(400)
-	// }
-
-	// body.description = body.description.trim()
-
-
-	// body.id = todoNextId++;
-
-	// todos.push(body);
-
-	// response.json(body);
 
 });
 
