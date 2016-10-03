@@ -191,17 +191,23 @@ app.delete('/todos/:id', function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
 
-	var matchedTodo = _.findWhere(todos, {id: todoID});
-
-	if(!matchedTodo)
-	{
-		response.status(404).json({"error": "Not Found"});
-	}
-	else
-	{
-		todos = _.without(todos, matchedTodo);
-		response.json(matchedTodo);
-	}
+	db.todo.destroy({
+		where: {
+			id: todoID
+		}
+	}).then(function(destroyedRows){
+		if (destroyedRows === 0)
+		{
+			response.status(404).json({
+				error: 'No todo with id'
+			});
+		}
+		else{
+			response.status(204).send();
+		}
+	}, function(){
+		response.status(500).send();
+	});
 
 });
 
