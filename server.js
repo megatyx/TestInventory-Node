@@ -195,11 +195,7 @@ app.put('/todos/:id', function(request, response){
 
 		console.log(e);
 		response.status(500).send();
-	}).catch(function(e){
-
-		console.log(e);
-		response.status(500).send();
-	})
+	});
 
 });
 
