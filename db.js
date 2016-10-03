@@ -16,7 +16,7 @@ var sequelize;
 
 var db = {};
 
-db.todo = sequelize.import(__dirname + '/Model/todo.js');
+db.todo = sequelize.import(__dirname + '/model/todo.js');
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
