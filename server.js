@@ -172,7 +172,7 @@ app.put('/todos/:id', function(request, response){
 	if(body.hasOwnProperty('description'))
 	{
 
-		attributes.description = body.description
+		attributes.description = body.description;
 	}
 
 	db.todo.findById(todoID).then(function(todo){
@@ -186,10 +186,12 @@ app.put('/todos/:id', function(request, response){
 			response.status(404).send();
 
 		}
+	}, function(){
+		response.status(500).send();
 	}).then(function(todo){
 
 		response.json(todo.toJSON());
-	}).then(function(e){
+	}, function(e){
 
 		console.log(e);
 		response.status(500).send();
