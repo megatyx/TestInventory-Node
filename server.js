@@ -158,11 +158,6 @@ app.put('/todos/:id', function(request, response){
 	var body = _.pick(request.body, 'description', 'completed');
 	var attributes = {};
 
-	if(!matchedTodo)
-	{
-		return response.status(404).send()
-	}
-
 	if(body.hasOwnProperty('completed')) 
 	{
 		attributes.completed = body.completed;
