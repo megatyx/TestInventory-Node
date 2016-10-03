@@ -155,8 +155,6 @@ app.post('/todos', function(request, response){
 app.put('/todos/:id', function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {id: todoID});
-	var body = _.pick(request.body, 'description', 'completed');
 	var attributes = {};
 
 	if(!matchedTodo)
