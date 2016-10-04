@@ -158,23 +158,31 @@ app.put('/todos/:id', function(request, response){
 	var body = _.pick(request.body, 'description', 'completed');
 	var attributes = {};
 
-	if(body.hasOwnProperty('completed')) 
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)) 
 	{
 		attributes.completed = body.completed;
-
 	}
 
-	if(body.hasOwnProperty('description'))
+	if(body.hasOwnProperty('description') && _.isString(body.description))
 	{
-
 		attributes.description = body.description;
+	}
+
+	if(_.isEmpty(attributes))
+	{
+		response.status(400).json({error: 'no valid attributes sent'});
+		return;
 	}
 
 	db.todo.findById(todoID).then(function(todo){
 
 		if(todo)
 		{
-			return todo.update(attributes);
+			todo.update(attributes).then(function(todo){
+				response.json(todo.toJSON());
+			}, function (e){
+				response.status(400).json(e);
+			});
 		}
 		else
 		{
@@ -183,11 +191,6 @@ app.put('/todos/:id', function(request, response){
 		}
 	}, function () {
 		response.status(500).send();
-	}).then(function (todo) {
-
-		response.json(todo.toJSON());
-	}, function (e) {
-		response.status(400).json(e);
 	});
 
 });
