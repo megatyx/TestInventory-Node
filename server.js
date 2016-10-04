@@ -181,15 +181,13 @@ app.put('/todos/:id', function(request, response){
 			response.status(404).send();
 
 		}
-	}, function(){
+	}, function () {
 		response.status(500).send();
-	}).then(function(todo){
+	}).then(function (todo) {
 
 		response.json(todo.toJSON());
-	}, function(e){
-
-		console.log(e);
-		response.status(500).send();
+	}, function (e) {
+		response.status(400).json(e);
 	});
 
 });
