@@ -1,5 +1,7 @@
 var bcrypt = require('bcrypt');
 var _ = require('underscore');
+var cryptojs = require('crypto-js');
+var jwt = require('jsonwebtoken');
 
 module.exports = function(sequelize, DataTypes){
 
@@ -61,6 +63,7 @@ module.exports = function(sequelize, DataTypes){
 
 					user.findOne({where: where}).then(function(user){
 						if(!user || !bcrypt.compareSync(body.password, user.get('password_hash'))){
+							console.log('user object null compareSync not working');
 							return reject();
 						}
 						console.log('login accepted');
@@ -76,6 +79,29 @@ module.exports = function(sequelize, DataTypes){
 			toPublicJSON: function (){
 				var json = this.toJSON();
 				return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
+			},
+			generateToken: function(type){
+				if(!_.isString(type))
+				{
+					console.log('not a string');
+					return undefined;
+				}
+
+				try {
+					var stringData = JSON.stringify({id: this.get('id'), type: type});
+					var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123').toString();
+					var token = jwt.sign({
+						token: encryptedData
+					}, 'querty098');
+
+					console.log('returning token');
+
+					return token;
+
+				} catch (e){
+					console.log(e);
+					return undefined;
+				}
 			}
 		}
 	});

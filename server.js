@@ -152,36 +152,36 @@ app.post('/todos', function(request, response){
 
 });
 
-app.get('/users', function(request, response){
+// app.get('/users', function(request, response){
 
-	var query = request.query;
+// 	var query = request.query;
 
-	var where = {};
+// 	var where = {};
 
-	if(query.hasOwnProperty('email') && query.email.length > 0){
+// 	if(query.hasOwnProperty('email') && query.email.length > 0){
 
-		where.email = query.email
-	}
+// 		where.email = query.email
+// 	}
 
-	if(query.hasOwnProperty('password') && query.password.length > 6)
-	{
+// 	if(query.hasOwnProperty('password') && query.password.length > 6)
+// 	{
 
-		where.password = query.password
-	}
+// 		where.password = query.password
+// 	}
 
-	if(!where.password || !where.email)
-	{
-		response.status(400).json({error: 'Must have both a valid email and password'})
-	}
+// 	if(!where.password || !where.email)
+// 	{
+// 		response.status(400).json({error: 'Must have both a valid email and password'})
+// 	}
 
-	db.user.findAll({where: where}).then(function(users){
-		response.json(users);
-	}, function(e){
-		console.log(e);
-		response.status(500).send();
-	});
+// 	db.user.findAll({where: where}).then(function(users){
+// 		response.json(users);
+// 	}, function(e){
+// 		console.log(e);
+// 		response.status(500).send();
+// 	});
 
-});
+// });
 
 app.post('/users', function(request, response){
 
@@ -272,10 +272,12 @@ app.post('/users/login', function(request, response){
 
 	var body = _.pick(request.body, 'email', 'password');
 
+	console.log('authenticating...');
+
 	db.user.authenticate(body).then(function(user){
-		console.log('returning to user....');
-		response.json(user.toPublicJSON());
+		response.header('Auth', user.generateToken('authentication')).json(user.toPublicJSON());
 	}, function(){
+		console.log('NOOOOPE');
 		response.sendStatus(401);
 	});
 });
