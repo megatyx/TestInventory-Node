@@ -7,7 +7,7 @@ var bcrypt = require('bcrypt');
 
 
 var PORT = process.env.PORT || 3000;
-var middleware = require('./Model/middleware.js');
+var middleware = require('./middleware.js')(db);
 
 var todos = []
 
@@ -26,10 +26,20 @@ var autoComplete = {
 		]
 	}
 
-app.use(middleware.requireAuthentication);
-app.use(middleware.logger);
+// app.use(middleware.requireAuthentication);
+// app.use(middleware.logger);
 app.use(bodyParser.json());
 
+app.get('/todd', function(request, response){
+
+	var todd = [{
+		id: 0,
+		isGay: 'maybe',
+		description: 'Hi, I\'m Todd. I love pounding buttholes'
+	}]
+
+	response.json(todd)
+});
 
 app.get('/ask/:id', function(request, response){
 
@@ -68,7 +78,12 @@ app.get('/', function(request, response){
 	response.send('Todo API ROOT')
 });
 
-app.get('/todos', function(request, response){
+app.get('/about', function(request, response){
+
+	response.send('About us!');
+});
+
+app.get('/todos', middleware.requireAuthentication, function(request, response){
 
 	var query = request.query;
 
@@ -100,7 +115,7 @@ app.get('/todos', function(request, response){
 
 });
 
-app.get('/todos/:id', function(request, response){
+app.get('/todos/:id', middleware.requireAuthentication, function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
 
@@ -120,24 +135,8 @@ app.get('/todos/:id', function(request, response){
 	
 });
 
-app.get('/todd', function(request, response){
 
-	var todd = [{
-		id: 0,
-		isGay: 'maybe',
-		description: 'Hi, I\'m Todd. I love pounding buttholes'
-	}]
-
-	response.json(todd)
-});
-
-app.get('/about', middleware.requireAuthentication, function(request, response){
-
-	response.send('About us!');
-});
-
-
-app.post('/todos', function(request, response){
+app.post('/todos', middleware.requireAuthentication, function(request, response){
 
 	var body = _.pick(request.body, 'description', 'completed');
 
@@ -152,56 +151,8 @@ app.post('/todos', function(request, response){
 
 });
 
-// app.get('/users', function(request, response){
 
-// 	var query = request.query;
-
-// 	var where = {};
-
-// 	if(query.hasOwnProperty('email') && query.email.length > 0){
-
-// 		where.email = query.email
-// 	}
-
-// 	if(query.hasOwnProperty('password') && query.password.length > 6)
-// 	{
-
-// 		where.password = query.password
-// 	}
-
-// 	if(!where.password || !where.email)
-// 	{
-// 		response.status(400).json({error: 'Must have both a valid email and password'})
-// 	}
-
-// 	db.user.findAll({where: where}).then(function(users){
-// 		response.json(users);
-// 	}, function(e){
-// 		console.log(e);
-// 		response.status(500).send();
-// 	});
-
-// });
-
-app.post('/users', function(request, response){
-
-	var body = _.pick(request.body, 'email', 'password');
-
-	db.user.create(body).then(function(user){
-
-		response.json(user.toPublicJSON());
-
-	}, function(e){
-
-		console.log(e);
-		//response.status(400).json({error: 'failure to insert into the database'});
-		response.status(400).json(e);
-	});
-
-});
-
-
-app.put('/todos/:id', function(request, response){
+app.put('/todos/:id', middleware.requireAuthentication, function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
 	var body = _.pick(request.body, 'description', 'completed');
@@ -244,7 +195,7 @@ app.put('/todos/:id', function(request, response){
 
 });
 
-app.delete('/todos/:id', function(request, response){
+app.delete('/todos/:id', middleware.requireAuthentication, function(request, response){
 
 	var todoID = parseInt(request.params.id, 10);
 
@@ -264,6 +215,23 @@ app.delete('/todos/:id', function(request, response){
 		}
 	}, function(){
 		response.status(500).send();
+	});
+
+});
+
+app.post('/users', function(request, response){
+
+	var body = _.pick(request.body, 'email', 'password');
+
+	db.user.create(body).then(function(user){
+
+		response.json(user.toPublicJSON());
+
+	}, function(e){
+
+		console.log(e);
+		//response.status(400).json({error: 'failure to insert into the database'});
+		response.status(400).json(e);
 	});
 
 });
