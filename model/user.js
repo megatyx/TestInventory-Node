@@ -3,7 +3,7 @@ var _ = require('underscore');
 
 module.exports = function(sequelize, DataTypes){
 
-	return sequelize.define('user', {
+	var user = sequelize.define('user', {
 
 		email:{
 			type: DataTypes.STRING,
@@ -49,6 +49,29 @@ module.exports = function(sequelize, DataTypes){
 				}
 			}
 		},
+		classMethods: {
+			authenticate: function(body) {
+				return new Promise(function(resolve, reject){
+					var where = {email: body.email};
+					if(typeof body.email !== 'string' || typeof body.password !== 'string')
+					{
+						console.log('rejected based on no valid email or password');
+						return reject();
+					}
+
+					user.findOne({where: where}).then(function(user){
+						if(!user || !bcrypt.compareSync(body.password, user.get('password_hash'))){
+							return reject();
+						}
+						console.log('login accepted');
+						resolve(user);
+					}, function(e){
+						console.log(e);
+						reject();
+					});
+				});
+			}
+		},
 		instanceMethods: {
 			toPublicJSON: function (){
 				var json = this.toJSON();
@@ -56,5 +79,6 @@ module.exports = function(sequelize, DataTypes){
 			}
 		}
 	});
+	return user;
 
-}
+};

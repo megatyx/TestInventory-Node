@@ -3,6 +3,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
+var bcrypt = require('bcrypt');
 
 
 var PORT = process.env.PORT || 3000;
@@ -265,6 +266,18 @@ app.delete('/todos/:id', function(request, response){
 		response.status(500).send();
 	});
 
+});
+
+app.post('/users/login', function(request, response){
+
+	var body = _.pick(request.body, 'email', 'password');
+
+	db.user.authenticate(body).then(function(user){
+		console.log('returning to user....');
+		response.json(user.toPublicJSON());
+	}, function(){
+		response.sendStatus(401);
+	});
 });
 
 app.use(express.static(__dirname + '/public'));
