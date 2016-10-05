@@ -275,7 +275,19 @@ app.post('/users/login', function(request, response){
 	console.log('authenticating...');
 
 	db.user.authenticate(body).then(function(user){
-		response.header('Auth', user.generateToken('authentication')).json(user.toPublicJSON());
+		var token = user.generateToken('authentication');
+
+		if(token)
+		{
+			response.header('Auth', token).json(user.toPublicJSON());
+		}
+		else
+		{
+			console.log('NOOOOPE');
+			response.sendStatus(401);
+		}
+		
+
 	}, function(){
 		console.log('NOOOOPE');
 		response.sendStatus(401);
