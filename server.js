@@ -188,12 +188,13 @@ app.post('/users', function(request, response){
 
 	db.user.create(body).then(function(user){
 
-		response.json(user.toJSON());
+		response.json(user.toPublicJSON());
 
 	}, function(e){
 
 		console.log(e);
-		response.status(400).json({error: 'failure to insert into the database'});
+		//response.status(400).json({error: 'failure to insert into the database'});
+		response.status(400).json(e);
 	});
 
 });
@@ -268,7 +269,7 @@ app.delete('/todos/:id', function(request, response){
 
 app.use(express.static(__dirname + '/public'));
 
-db.sequelize.sync().then(function(){
+db.sequelize.sync({force: true}).then(function(){
 
 	app.listen(PORT, function(){
 
