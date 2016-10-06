@@ -149,15 +149,10 @@ app.get('/todos/:id', middleware.requireAuthentication, function(request, respon
 app.post('/todos', middleware.requireAuthentication, function(request, response){
 
 	var body = _.pick(request.body, 'description', 'completed');
-
 	db.todo.create(body).then(function(todo){
-
-		//response.json(todo.toJSON());
-
 		request.user.addTodo(todo).then(function(){
 			return todo.reload();
-
-		}).then(function(){
+		}).then(function(todo){
 			response.json(todo.toJSON());
 		});
 
