@@ -255,26 +255,30 @@ app.post('/users', function(request, response){
 app.post('/users/login', function(request, response){
 
 	var body = _.pick(request.body, 'email', 'password');
+	var userInstance;
 
 	console.log('authenticating...');
 
 	db.user.authenticate(body).then(function(user){
 		var token = user.generateToken('authentication');
+		userInstance = user;
+		return db.token.create({
+			token: token
+		});
+	}).then(function(tokenInstance){
+		response.header('Auth', tokenInstance.get('token')).json(userInstance.toPublicJSON());
 
-		if(token)
-		{
-			response.header('Auth', token).json(user.toPublicJSON());
-		}
-		else
-		{
-			console.log('NOOOOPE');
-			response.sendStatus(401);
-		}
-		
-
-	}, function(){
+	}).catch(function(){
 		console.log('NOOOOPE');
 		response.sendStatus(401);
+	});
+});
+
+app.delete('/users/logout', middleware.requireAuthentication, function(request, response){
+	request.token.destroy().then(function(){
+		response.sendStatus(204);
+	}).catch(function(){
+		response.sendStatus(500);
 	});
 });
 
