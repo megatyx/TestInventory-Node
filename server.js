@@ -285,7 +285,7 @@ app.post('/users/login', function(request, response){
 
 app.use(express.static(__dirname + '/public'));
 
-db.sequelize.sync({force: true}).then(function(){
+db.sequelize.sync().then(function(){
 
 	app.listen(PORT, function(){
 
