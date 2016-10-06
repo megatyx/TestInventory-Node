@@ -87,7 +87,11 @@ app.get('/todos', middleware.requireAuthentication, function(request, response){
 
 	var query = request.query;
 
-	var where = {};
+	var where = { 
+
+		userId: request.user.get('id')
+
+	};
 
 	if(query.hasOwnProperty('completed') && query.completed === 'true'){
 
@@ -119,8 +123,12 @@ app.get('/todos/:id', middleware.requireAuthentication, function(request, respon
 
 	var todoID = parseInt(request.params.id, 10);
 
-	var matchedTodo = db.todo.findById(todoID).then(function(todo){
-
+	db.todo.findOne({
+		where: {
+			id: todoID,
+			userId: request.user.get('id')
+		}
+	}).then(function(todo){
 		if(!!todo)
 		{
 			response.json(todo.toJSON());
@@ -132,6 +140,8 @@ app.get('/todos/:id', middleware.requireAuthentication, function(request, respon
 	}, function(e){
 		response.status(500).send();
 	});
+
+		
 	
 });
 
@@ -142,7 +152,14 @@ app.post('/todos', middleware.requireAuthentication, function(request, response)
 
 	db.todo.create(body).then(function(todo){
 
-		response.json(todo.toJSON());
+		//response.json(todo.toJSON());
+
+		request.user.addTodo(todo).then(function(){
+			return todo.reload();
+
+		}).then(function(){
+			response.json(todo.toJSON());
+		});
 
 	}, function(e){
 
@@ -174,7 +191,12 @@ app.put('/todos/:id', middleware.requireAuthentication, function(request, respon
 		return;
 	}
 
-	db.todo.findById(todoID).then(function(todo){
+	db.todo.findOne({
+		where: {
+			id: todoID,
+			userId: request.user.get('id')
+		}
+	}).then(function(todo){
 
 		if(todo)
 		{
@@ -201,17 +223,16 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(request, res
 
 	db.todo.destroy({
 		where: {
-			id: todoID
+			id: todoID,
+			userId: request.user.get('id')
 		}
 	}).then(function(destroyedRows){
 		if (destroyedRows === 0)
 		{
-			response.status(404).json({
-				error: 'No todo with id'
-			});
+			response.sendStatus(404)
 		}
 		else{
-			response.status(204).send();
+			response.status(204).json({status: 'deleted'});
 		}
 	}, function(){
 		response.status(500).send();
