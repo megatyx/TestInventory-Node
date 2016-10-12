@@ -9,20 +9,20 @@ if (process.env.NODE_ENV === 'production') {
 else {
 	sequelize = new Sequelize(undefined, undefined, undefined, {
 		dialect: 'sqlite',
-		storage: __dirname + '/data/dev-todo-api.sqlite'
+		storage: __dirname + '/data/dev-inventory-api.sqlite'
 	});
 }
 
 var db = {};
 
-db.todo = sequelize.import(__dirname + '/model/todo.js');
+db.item = sequelize.import(__dirname + '/model/item.js');
 db.user = sequelize.import(__dirname + '/model/user.js');
 db.token = sequelize.import(__dirname + '/model/token.js');
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db.todo.belongsTo(db.user);
-db.user.hasMany(db.todo);
+db.item.belongsTo(db.user);
+db.user.hasMany(db.item);
 
 
 module.exports = db;
