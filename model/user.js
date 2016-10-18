@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes){
 
 	var user = sequelize.define('user', {
 
-		userName:{
+		username:{
 			type: DataTypes.STRING,
 			allowNull: false,
 			unique: true
@@ -42,17 +42,17 @@ module.exports = function(sequelize, DataTypes){
 
 			beforeValidate: function(user, options){
 
-				if(typeof user.userName === 'string')
+				if(typeof user.username === 'string')
 				{
-					user.userName = user.userName.toLowerCase();
+					user.username = user.username.toLowerCase();
 				}
 			}
 		},
 		classMethods: {
 			authenticate: function(body) {
 				return new Promise(function(resolve, reject){
-					var where = {userName: body.userName};
-					if(typeof body.userName !== 'string' || typeof body.password !== 'string')
+					var where = {username: body.username};
+					if(typeof body.username !== 'string' || typeof body.password !== 'string')
 					{
 						console.log('rejected based on no valid username or password');
 						return reject();
@@ -101,7 +101,7 @@ module.exports = function(sequelize, DataTypes){
 		instanceMethods: {
 			toPublicJSON: function (){
 				var json = this.toJSON();
-				return _.pick(json, 'id', 'userName', 'createdAt', 'updatedAt');
+				return _.pick(json, 'id', 'username', 'createdAt', 'updatedAt');
 			},
 			generateToken: function(type){
 				if(!_.isString(type))

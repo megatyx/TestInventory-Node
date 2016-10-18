@@ -19,7 +19,7 @@ app.get('/', function(request, response){
 app.post('/users', function(request, response){
 
 	var body = _.pick(request.body, 'username', 'password');
-	body.userName = body.username;
+	body.username = body.username;
 
 	db.user.create(body).then(function(user){
 
@@ -37,7 +37,7 @@ app.post('/users', function(request, response){
 app.post('/users/login', function(request, response){
 
 	var body = _.pick(request.body, 'username', 'password');
-	body.userName = body.username;
+	body.username = body.username;
 	var userInstance;
 
 	console.log('authenticating...');
@@ -65,7 +65,7 @@ app.delete('/users/logout', middleware.requireAuthentication, function(request, 
 	});
 });
 
-app.get('/todos', middleware.requireAuthentication, function(request, response){
+app.get('/items', middleware.requireAuthentication, function(request, response){
 
 	var query = request.query;
 
@@ -74,7 +74,6 @@ app.get('/todos', middleware.requireAuthentication, function(request, response){
 		userId: request.user.get('id')
 
 	};
-
 
 	if(query.hasOwnProperty('quantity') && query.quantity >= 0)
 	{
@@ -92,15 +91,15 @@ app.get('/todos', middleware.requireAuthentication, function(request, response){
 		}
 	}
 
-	if(query.hasOwnProperty('itemName') && query.itemName.length > 0)
+	if(query.hasOwnProperty('name') && query.name.length > 0)
 	{
 
-		where.itemName = {
-			$like: '%'+ query.itemName + '%'
+		where.name = {
+			$like: '%'+ query.name + '%'
 		}
 	}
 
-	if(query.hasOwnProperty('description') && query.itemName.length > 0)
+	if(query.hasOwnProperty('description') && query.description.length > 0)
 	{
 
 		where.description = {
@@ -143,9 +142,9 @@ app.get('/items/:barcode', middleware.requireAuthentication, function(request, r
 
 app.post('/items', middleware.requireAuthentication, function(request, response){
 
-	var body = _.pick(request.body, 'barcode', 'itemName', 'quantity', 'description');
+	var body = _.pick(request.body, 'barcode', 'name', 'quantity', 'description', 'price');
 	db.item.create(body).then(function(item){
-		request.user.addTodo(item).then(function(){
+		request.user.addItem(item).then(function(){
 			return item.reload();
 		}).then(function(item){
 			response.json(item.toJSON());
@@ -161,7 +160,8 @@ app.post('/items', middleware.requireAuthentication, function(request, response)
 
 app.put('/items', middleware.requireAuthentication, function(request, response){
 
-	var body = _.pick(request.body, 'barcode', 'itemName', 'quantity', 'description');
+	var body = _.pick(request.body, 'barcode', 'name', 'quantity', 'description');
+
 	var attributes = {};
 
 	if(body.hasOwnProperty('barcode') && _.isString(body.barcode))
@@ -173,9 +173,9 @@ app.put('/items', middleware.requireAuthentication, function(request, response){
 		return response.status(404)
 	}
 
-	if(body.hasOwnProperty('itemName') && _.isString(body.itemName))
+	if(body.hasOwnProperty('name') && _.isString(body.name))
 	{
-		attributes.itemName = body.itemName;
+		attributes.name = body.name;
 	}
 
 	if(body.hasOwnProperty('quantity') && _.isNumber(body.quantity))
@@ -193,6 +193,7 @@ app.put('/items', middleware.requireAuthentication, function(request, response){
 		response.status(400).json({error: 'no valid attributes sent'});
 		return;
 	}
+
 
 	db.item.findOne({
 		where: {
@@ -221,13 +222,13 @@ app.put('/items', middleware.requireAuthentication, function(request, response){
 });
 
 
-app.delete('/todos/:id', middleware.requireAuthentication, function(request, response){
+app.delete('/items/:id', middleware.requireAuthentication, function(request, response){
 
-	var todoID = parseInt(request.params.id, 10);
+	var itemID = parseInt(request.params.id, 10);
 
-	db.todo.destroy({
+	db.item.destroy({
 		where: {
-			id: todoID,
+			id: itemID,
 			userId: request.user.get('id')
 		}
 	}).then(function(destroyedRows){

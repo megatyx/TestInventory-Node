@@ -3,21 +3,21 @@ module.exports = function(sequelize, DataTypes){
 	return sequelize.define('item', {
 
 
-		barcodeNumber: {
+		barcode: {
 			type: DataTypes.STRING,
 			allowNull: false
-		}
+		},
 
-		itemName: {
+		name: {
 			type: DataTypes.STRING,
 			allowNull: false
-		}
+		},
 
 		quantity: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			defaultValue: 0
-		}
+		},
 
 		description: {
 			type: DataTypes.STRING,
@@ -25,6 +25,12 @@ module.exports = function(sequelize, DataTypes){
 			validate: {
 				len: [1,250]
 			}
+		},
+
+		price: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			defaultValue: 0
 		}
 	});
 
