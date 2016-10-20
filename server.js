@@ -29,7 +29,7 @@ app.post('/users', function(request, response){
 
 		console.log(e);
 		//response.status(400).json({error: 'failure to insert into the database'});
-		response.status(400).json(e);
+		response.sendStatus(400);
 	});
 
 });
