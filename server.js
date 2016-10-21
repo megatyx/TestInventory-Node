@@ -3,12 +3,17 @@ var app = express();
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
+var path = require('path');
+var fs = require('fs-extra');
+var busboy = require('connect-busboy');
 
 
 var PORT = process.env.PORT || 3000;
 var middleware = require('./middleware.js')(db);
 
 app.use(bodyParser.json());
+app.use(busboy());
+app.use(express.static(path.join(__dirname,'public')));
 
 app.get('/', function(request, response){
 
@@ -243,6 +248,23 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 		response.status(500).send();
 	});
 
+});
+
+app.route('/items/image/upload').post(function (req, res, next) {
+
+        var fstream;
+        req.pipe(req.busboy);
+        req.busboy.on('file', function (fieldname, file, filename) {
+            console.log("Uploading: " + filename);
+
+            //Path where image will be uploaded
+            fstream = fs.createWriteStream(__dirname + '/images/' + filename);
+            file.pipe(fstream);
+            fstream.on('close', function () {    
+                console.log("Upload Finished of " + filename);              
+                response.status(200).json({status: 'uploaded'});
+            });
+        });
 });
 
 
