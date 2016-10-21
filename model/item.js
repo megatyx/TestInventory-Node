@@ -31,6 +31,14 @@ module.exports = function(sequelize, DataTypes){
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			defaultValue: 0
+		},
+
+		photoLocation: {
+			type: DataTypes.STRING,
+			allowNull: true,
+			validate: {
+				len: [1,250]
+			}
 		}
 	});
 

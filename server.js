@@ -250,21 +250,51 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 });
 
-app.route('/items/image/upload').post(function (req, res, next) {
+app.post('/items/image/upload/:id', middleware.requireAuthentication, function (req, res, next) {
 
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
-            console.log("Uploading: " + filename);
+		var itemID = parseInt(request.params.id, 10);
 
-            //Path where image will be uploaded
-            fstream = fs.createWriteStream(__dirname + '/images/' + filename);
-            file.pipe(fstream);
-            fstream.on('close', function () {    
-                console.log("Upload Finished of " + filename);              
-                response.status(200).json({status: 'uploaded'});
-            });
-        });
+
+		db.item.findOne({
+			where: {
+				id: itemID,
+				userId: request.user.get('id')
+			}
+		}).then(function(item){
+		if(item)
+		{
+			var fstream;
+        	req.pipe(req.busboy);
+        	req.busboy.on('file', function (fieldname, file, filename) {
+            	console.log("Uploading: " + filename);
+
+            	var fileLocation = __dirname + '/images/' + filename;
+
+            	//Path where image will be uploaded
+            	fstream = fs.createWriteStream(fileLocation);
+            	file.pipe(fstream);
+            	fstream.on('close', function () {    
+                	console.log("Upload Finished of " + filename);
+
+                	var attributes = {photoLocation: fileLocation};
+
+                	item.update(attributes).then(function(item){
+						response.status(200).json({status: 'uploaded'});
+					}, function (e){
+						console.log(e)
+						response.status(400).json({error: 'An Error has occurred'});
+					});
+            	});
+        	});
+		}
+		else
+		{
+			response.status(404).send();
+
+		}
+	}, function () {
+		response.status(500).send();
+	});
 });
 
 
