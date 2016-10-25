@@ -114,11 +114,9 @@ app.get('/items', middleware.requireAuthentication, function(request, response){
 	}
 
 	db.item.findAll({where: where}).then(function(items){
-		if (items)
-		{
+
 			response.json(items);
-		}
-		else{response.sendStatus(404);}
+		
 	}, function(e){
 		response.status(500).send();
 	});
