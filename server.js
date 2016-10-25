@@ -250,7 +250,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 });
 
-app.post('/items/image/upload/:id', middleware.requireAuthentication, function (req, res, next) {
+app.post('/items/image/upload/:id', middleware.requireAuthentication, function (request, response, next) {
 
 		var itemID = parseInt(request.params.id, 10);
 
@@ -263,29 +263,60 @@ app.post('/items/image/upload/:id', middleware.requireAuthentication, function (
 		}).then(function(item){
 		if(item)
 		{
+			console.log('starting busboy')
 			var fstream;
-        	req.pipe(req.busboy);
-        	req.busboy.on('file', function (fieldname, file, filename) {
+        	
+        	request.busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
+
             	console.log("Uploading: " + filename);
+            	var filePath = __dirname + '/images/' + user.username
+            	var fileLocation = filePath + '/' + filename;
 
-            	var fileLocation = __dirname + '/images/' + filename;
+            	fs.ensureDir(filePath, function(err){
+            		if(err) {console.log(err); return;}
 
-            	//Path where image will be uploaded
-            	fstream = fs.createWriteStream(fileLocation);
-            	file.pipe(fstream);
-            	fstream.on('close', function () {    
-                	console.log("Upload Finished of " + filename);
+            		//Path where image will be uploaded
 
-                	var attributes = {photoLocation: fileLocation};
+            		fs.stat(filePath, (error, stats) => {
 
-                	item.update(attributes).then(function(item){
-						response.status(200).json({status: 'uploaded'});
-					}, function (e){
-						console.log(e)
-						response.status(400).json({error: 'An Error has occurred'});
-					});
+            			var fileExistsFlag = false;
+            			var loopNumber = 0;
+            			while (fileExistsFlag === false)
+            			{
+            				if(stats.isFile(filename))
+            				{
+            					fileExistsFlag = true;
+            				}
+            				else{
+            					loopNumber += 1;
+            					filename = filename + loopNumber.toString();
+            				}
+            			}
+
+            			fstream = fs.createWriteStream(fileLocation);
+		            	file.pipe(fstream);
+		            	fstream.on('close', function () {    
+		                	console.log("Upload Finished of " + filename);
+
+		                	var attributes = {photoLocation: fileLocation};
+
+		                	item.update(attributes).then(function(item){
+								response.status(200).json({status: 'uploaded'});
+							}, function (e){
+								console.log(e)
+								response.status(400).json({error: 'An Error has occurred'});
+							});
+	            		});
+
+            		});
+
             	});
+        	}).catch(function(e){
+        		console.log(e);
+        		response.sendStatus(400);
         	});
+
+        	request.pipe(request.busboy);
 		}
 		else
 		{
