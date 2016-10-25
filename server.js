@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var busboy = require('connect-busboy');
 
 
+
 var PORT = process.env.PORT || 3000;
 var middleware = require('./middleware.js')(db);
 
@@ -113,7 +114,11 @@ app.get('/items', middleware.requireAuthentication, function(request, response){
 	}
 
 	db.item.findAll({where: where}).then(function(items){
-		response.json(items);
+		if (items)
+		{
+			response.json(items);
+		}
+		else{response.sendStatus(404);}
 	}, function(e){
 		response.status(500).send();
 	});
