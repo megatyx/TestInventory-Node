@@ -5,7 +5,15 @@ var _ = require('underscore');
 var db = require('./db.js');
 var path = require('path');
 var fs = require('fs-extra');
-var busboy = require('connect-busboy');
+var multer = require('multer');
+var multerStrage = multer.diskStorage({
+		destination: function(request, file, cb){ 
+			var filePath = __dirname + '/images/' + user.username
+        	var fileLocation = filePath + '/' + filename;
+			cb(null, '')
+		},
+
+});
 
 
 
@@ -13,7 +21,6 @@ var PORT = process.env.PORT || 3000;
 var middleware = require('./middleware.js')(db);
 
 app.use(bodyParser.json());
-app.use(busboy());
 app.use(express.static(path.join(__dirname,'public')));
 
 app.get('/', function(request, response){
@@ -253,10 +260,20 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 });
 
-app.post('/items/image/upload/:id', middleware.requireAuthentication, function (request, response, next) {
+app.post('/items/image/upload/:id', 
+	middleware.requireAuthentication, 
+	middleware.ensureFileDirectory, 
+	middleware.emptyFileDirectory, 
+	multer({dest: __dirname + '/images/' + request.user.username, 
+			rename: function(fieldname, filename){return filename;},
+			limits: {files: 1}}), 
+	function (request, response, next) {
 
 		var itemID = parseInt(request.params.id, 10);
 
+		var fileName = request.file.filename
+
+		console.log(filename);
 
 		db.item.findOne({
 			where: {
@@ -266,60 +283,14 @@ app.post('/items/image/upload/:id', middleware.requireAuthentication, function (
 		}).then(function(item){
 		if(item)
 		{
-			console.log('starting busboy')
-			var fstream;
-        	
-        	request.busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
+			var attributes = {photoLocation: fileName};
 
-            	console.log("Uploading: " + filename);
-            	var filePath = __dirname + '/images/' + user.username
-            	var fileLocation = filePath + '/' + filename;
-
-            	fs.ensureDir(filePath, function(err){
-            		if(err) {console.log(err); return;}
-
-            		//Path where image will be uploaded
-
-            		fs.stat(filePath, (error, stats) => {
-
-            			var fileExistsFlag = false;
-            			var loopNumber = 0;
-            			while (fileExistsFlag === false)
-            			{
-            				if(stats.isFile(filename))
-            				{
-            					fileExistsFlag = true;
-            				}
-            				else{
-            					loopNumber += 1;
-            					filename = filename + loopNumber.toString();
-            				}
-            			}
-
-            			fstream = fs.createWriteStream(fileLocation);
-		            	file.pipe(fstream);
-		            	fstream.on('close', function () {    
-		                	console.log("Upload Finished of " + filename);
-
-		                	var attributes = {photoLocation: fileLocation};
-
-		                	item.update(attributes).then(function(item){
-								response.status(200).json({status: 'uploaded'});
-							}, function (e){
-								console.log(e)
-								response.status(400).json({error: 'An Error has occurred'});
-							});
-	            		});
-
-            		});
-
-            	});
-        	}).catch(function(e){
-        		console.log(e);
-        		response.sendStatus(400);
-        	});
-
-        	request.pipe(request.busboy);
+        	item.update(attributes).then(function(item){
+				response.status(200).json(item);
+			}, function (e){
+				console.log(e)
+				response.status(400).json({error: 'An Error has occurred'});
+			});
 		}
 		else
 		{
