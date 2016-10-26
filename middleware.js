@@ -23,9 +23,11 @@ module.exports = function(db){
 			}).catch(function(){
 				response.sendStatus(401);
 			});
-		}
+		},
 		ensureFileDirectory: function(request, response, next){
 
+			if(request.user)
+			{
 			var filePath = __dirname + '/images/' + request.user.username
 
         	fs.ensureDir(filePath, function(err){
@@ -33,10 +35,14 @@ module.exports = function(db){
         			response.status(404).json({error: 'error'})
         		 return;
         		}
+
+        		user.filePath = filePath;
         		next();
 
         	});
-		}
+        	}
+        	else{response.status(500).json({error: "no user Object"});}
+		},
 		emptyFileDirectory: function(request, response, next){
 
 			if(request.user)
@@ -49,6 +55,7 @@ module.exports = function(db){
 					next();
 				})
 			}
+			else{response.status(500).json({error: "no user Object"});}
 
 		}
 	}

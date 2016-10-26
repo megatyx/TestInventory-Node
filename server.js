@@ -6,14 +6,8 @@ var db = require('./db.js');
 var path = require('path');
 var fs = require('fs-extra');
 var multer = require('multer');
-var multerStrage = multer.diskStorage({
-		destination: function(request, file, cb){ 
-			var filePath = __dirname + '/images/' + user.username
-        	var fileLocation = filePath + '/' + filename;
-			cb(null, '')
-		},
+var uploader = multer({dest: __dirname + '/images'}, {limits: {files: 1}})
 
-});
 
 
 
@@ -260,18 +254,19 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 });
 
-app.post('/items/image/upload/:id', 
-	middleware.requireAuthentication, 
-	middleware.ensureFileDirectory, 
-	middleware.emptyFileDirectory, 
-	multer({dest: __dirname + '/images/' + request.user.username, 
-			rename: function(fieldname, filename){return filename;},
-			limits: {files: 1}}), 
-	function (request, response, next) {
+// app.post('/items/image/upload/:id', 
+// 	[middleware.requireAuthentication, 
+// 	middleware.ensureFileDirectory, 
+// 	middleware.emptyFileDirectory, 
+// 	multer({dest: function(file){return __dirname + '/images';}, 
+// 			limits: {files: 1}})], 
+// 	function (request, response, next) {
+
+	app.post('/items/image/upload/:id', [middleware.requireAuthentication, middleware.ensureFileDirectory, uploader.single('photo')], function (request, response) {
 
 		var itemID = parseInt(request.params.id, 10);
 
-		var fileName = request.file.filename
+		var fileName = request.photo.filename
 
 		console.log(filename);
 
