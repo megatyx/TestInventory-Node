@@ -266,9 +266,9 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 		var itemID = parseInt(request.params.id, 10);
 
-		var fileName = request.photo.filename
+		var fileName = request.file.filename
 
-		console.log(filename);
+		console.log(fileName);
 
 		db.item.findOne({
 			where: {
