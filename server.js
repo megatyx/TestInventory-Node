@@ -8,6 +8,19 @@ var fs = require('fs-extra');
 var multer = require('multer');
 var photoUploader = multer({dest: __dirname + '/images'}, {limits: {files: 1}}).single('photo');
 
+var newPhotoUploader = multer({dest: './uploads/',
+    rename: function (fieldname, filename) {
+        return filename
+    },
+    onFileUploadStart: function (file) {
+        console.log(file.fieldname + ' is starting ...')
+    },
+    onFileUploadData: function (file, data) {
+        console.log(data.length + ' of ' + file.fieldname + ' arrived')
+    },
+    onFileUploadComplete: function (file) {
+        console.log(file.fieldname + ' uploaded to  ' + file.path)
+    }}).single('photo');
 
 
 
@@ -266,13 +279,14 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 		var itemID = parseInt(request.params.id, 10);
 
-		photoUploader(request, response, function (err) {
+		newPhotoUploader(request, response, function (err) {
 		    if (err) {
 		      console.log(err)
 		      return;
 		    }
 
-			console.log(request.photo);
+			console.log(request.files);
+			console.log(request.file);
 
 		    console.log("YAY");
 		    response.status(200).json({status: "OH HAPPY DAY"});
