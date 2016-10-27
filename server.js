@@ -8,7 +8,7 @@ var fs = require('fs-extra');
 var multer = require('multer');
 var photoUploader = multer({dest: __dirname + '/images'}, {limits: {files: 1}}).single('photo');
 
-var newPhotoUploader = multer({dest: './uploads/',
+var newPhotoUploader = multer({dest: __dirname + '/images',
     rename: function (fieldname, filename) {
         return filename
     },
