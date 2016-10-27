@@ -265,7 +265,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 	app.post('/items/image/upload/:id', middleware.requireAuthentication, function (request, response) {
 
 
-		photoUploader(req, res, function (err) {
+		photoUploader(request, response, function (err) {
 		    if (err) {
 		      console.log(err)
 		      return;
