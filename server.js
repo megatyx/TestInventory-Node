@@ -262,7 +262,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 // 			limits: {files: 1}})], 
 // 	function (request, response, next) {
 
-	app.post('/items/image/upload/:id', [middleware.requireAuthentication, uploader.single('photo')], function (request, response) {
+	app.post('/items/image/upload/:id', [middleware.requireAuthentication, uploader.single()], function (request, response) {
 
 		console.log(request);
 
