@@ -268,7 +268,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 		var itemID = parseInt(request.params.id, 10);
 
-		var fileName = request.file.filename
+		var fileName = request.file.originalname
 
 		console.log(fileName);
 
