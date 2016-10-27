@@ -272,7 +272,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 		      return;
 		    }
 
-			console.log(request.file);
+			console.log(request.photo);
 
 		    console.log("YAY");
 		    response.status(200).json({status: "OH HAPPY DAY"});
