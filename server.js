@@ -262,7 +262,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 // 			limits: {files: 1}})], 
 // 	function (request, response, next) {
 
-	app.post('/items/image/upload/:id', [middleware.requireAuthentication, middleware.ensureFileDirectory, uploader.single('photo')], function (request, response) {
+	app.post('/items/image/upload/:id', [middleware.requireAuthentication, uploader.single('photo')], function (request, response) {
 
 		var itemID = parseInt(request.params.id, 10);
 
@@ -281,13 +281,25 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 			var attributes = {photoLocation: fileName};
 
-        	item.update(attributes).then(function(item){
-        		fs.move(__dirname + '/images/' + fileName, __dirname + '/images/' + user.username + '/' + fileName, [{clobber: true}], function (err) {
-  					if (err) {return console.error(err);}
-  					console.log("moved file successfully!")
+			var currentFilePath = __dirname + '/images';
+			var projectedFilePath = currentFilePath + '/' + user.username
 
-  					response.status(200).json(item);
-				});
+        	item.update(attributes).then(function(item){
+
+        		fs.ensureDir(filePath, function(err){
+	        		if(err) {console.log(err);
+	        			response.status(404).json({error: 'error'})
+	        		 return;
+	        		}
+
+	        		fs.move(currentFilePath + '/' + fileName, projectedFilePath + '/' + fileName, [{clobber: true}], function (err) {
+	  					if (err) {return console.error(err);}
+	  					console.log("moved file successfully!")
+
+	  					response.status(200).json(item);
+					});
+        		});
+        		
 			}, function (e){
 				console.log(e)
 				response.status(400).json({error: 'An Error has occurred'});
