@@ -278,10 +278,16 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 		}).then(function(item){
 		if(item)
 		{
+
 			var attributes = {photoLocation: fileName};
 
         	item.update(attributes).then(function(item){
-				response.status(200).json(item);
+        		fs.move(__dirname + '/images/' + fileName, __dirname + '/images/' + user.username + '/' + fileName, [{clobber: true}], function (err) {
+  					if (err) {return console.error(err);}
+  					console.log("moved file successfully!")
+
+  					response.status(200).json(item);
+				});
 			}, function (e){
 				console.log(e)
 				response.status(400).json({error: 'An Error has occurred'});
