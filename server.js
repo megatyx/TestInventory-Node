@@ -6,7 +6,7 @@ var db = require('./db.js');
 var path = require('path');
 var fs = require('fs-extra');
 var multer = require('multer');
-var uploader = multer({dest: __dirname + '/images'}, {limits: {files: 1}})
+var photoUploader = multer({dest: __dirname + '/images'}, {limits: {files: 1}}).single('photo');
 
 
 
@@ -262,59 +262,70 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 // 			limits: {files: 1}})], 
 // 	function (request, response, next) {
 
-	app.post('/items/image/upload/:id', [middleware.requireAuthentication, uploader.single('photo')], function (request, response) {
+	app.post('/items/image/upload/:id', middleware.requireAuthentication, function (request, response) {
 
-		console.log(request);
 
-		var itemID = parseInt(request.params.id, 10);
+		photoUploader(req, res, function (err) {
+		    if (err) {
+		      console.log(err)
+		      return;
+		    }
 
-		var fileName = request.file.originalname
+		    console.log("YAY");
+		    res.status(200).json({status: "OH HAPPY DAY"});
+		    return;
+		  });
+	// 	console.log(request);
 
-		console.log(fileName);
+	// 	var itemID = parseInt(request.params.id, 10);
 
-		db.item.findOne({
-			where: {
-				id: itemID,
-				userId: request.user.get('id')
-			}
-		}).then(function(item){
-		if(item)
-		{
+	// 	var fileName = request.file.originalname
 
-			var attributes = {photoLocation: fileName};
+	// 	console.log(fileName);
 
-			var currentFilePath = __dirname + '/images';
-			var projectedFilePath = currentFilePath + '/' + user.username
+	// 	db.item.findOne({
+	// 		where: {
+	// 			id: itemID,
+	// 			userId: request.user.get('id')
+	// 		}
+	// 	}).then(function(item){
+	// 	if(item)
+	// 	{
 
-        	item.update(attributes).then(function(item){
+	// 		var attributes = {photoLocation: fileName};
 
-        		fs.ensureDir(filePath, function(err){
-	        		if(err) {console.log(err);
-	        			response.status(404).json({error: 'error'})
-	        		 return;
-	        		}
+	// 		var currentFilePath = __dirname + '/images';
+	// 		var projectedFilePath = currentFilePath + '/' + user.username
 
-	        		fs.move(currentFilePath + '/' + fileName, projectedFilePath + '/' + fileName, [{clobber: true}], function (err) {
-	  					if (err) {return console.error(err);}
-	  					console.log("moved file successfully!")
+ //        	item.update(attributes).then(function(item){
 
-	  					response.status(200).json(item);
-					});
-        		});
+ //        		fs.ensureDir(filePath, function(err){
+	//         		if(err) {console.log(err);
+	//         			response.status(404).json({error: 'error'})
+	//         		 return;
+	//         		}
+
+	//         		fs.move(currentFilePath + '/' + fileName, projectedFilePath + '/' + fileName, [{clobber: true}], function (err) {
+	//   					if (err) {return console.error(err);}
+	//   					console.log("moved file successfully!")
+
+	//   					response.status(200).json(item);
+	// 				});
+ //        		});
         		
-			}, function (e){
-				console.log(e)
-				response.status(400).json({error: 'An Error has occurred'});
-			});
-		}
-		else
-		{
-			response.status(404).send();
+	// 		}, function (e){
+	// 			console.log(e)
+	// 			response.status(400).json({error: 'An Error has occurred'});
+	// 		});
+	// 	}
+	// 	else
+	// 	{
+	// 		response.status(404).send();
 
-		}
-	}, function () {
-		response.status(500).send();
-	});
+	// 	}
+	// }, function () {
+	// 	response.status(500).send();
+	// });
 });
 
 
