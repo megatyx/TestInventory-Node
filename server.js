@@ -264,6 +264,7 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 
 	app.post('/items/image/upload/:id', middleware.requireAuthentication, function (request, response) {
 
+		var itemID = parseInt(request.params.id, 10);
 
 		photoUploader(request, response, function (err) {
 		    if (err) {
@@ -271,17 +272,17 @@ app.delete('/items/:id', middleware.requireAuthentication, function(request, res
 		      return;
 		    }
 
+			console.log(request.file);
+
 		    console.log("YAY");
-		    res.status(200).json({status: "OH HAPPY DAY"});
+		    response.status(200).json({status: "OH HAPPY DAY"});
 		    return;
 		  });
 	// 	console.log(request);
 
-	// 	var itemID = parseInt(request.params.id, 10);
+		
 
-	// 	var fileName = request.file.originalname
-
-	// 	console.log(fileName);
+	
 
 	// 	db.item.findOne({
 	// 		where: {
